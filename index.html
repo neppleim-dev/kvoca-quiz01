@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>쑥쑥 어휘 왕국 - 맞춤법 퀴즈</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: 가독성 좋고 친근한 Jua(주아체) & Gowun Dodum(고운돋움) -->
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti (축하 폭죽 효과) -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    body {
+      font-family: 'Gowun Dodum', sans-serif;
+      background-color: #FFFDF9;
+      background-image: radial-gradient(#FFE5D9 1.5px, transparent 1.5px), radial-gradient(#D8F3DC 1.5px, #FFFDF9 1.5px);
+      background-size: 40px 40px;
+      background-position: 0 0, 20px 20px;
+      color: #2B2D42;
+      user-select: none;
+    }
+    .font-title {
+      font-family: 'Jua', sans-serif;
+    }
+    .pastel-card {
+      background: rgba(255, 255, 255, 0.95);
+      border: 4px solid #F8EDEB;
+      box-shadow: 0 10px 25px -5px rgba(255, 183, 178, 0.25);
+    }
+    .btn-bounce {
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+    }
+    .btn-bounce:active {
+      transform: scale(0.96);
+    }
+    .character-float {
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #FFFDF9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #FFB7B2;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 md:p-6">
+
+  <!-- 상단 네비게이션 / 학생 정보 배지 -->
+  <header class="max-w-4xl w-full mx-auto flex items-center justify-between bg-white/90 backdrop-blur border-2 border-pink-200 rounded-3xl px-5 py-3 shadow-sm mb-4">
+    <div class="flex items-center space-x-3 cursor-pointer" onclick="goHome()">
+      <span class="text-3xl">🌱</span>
+      <div>
+        <h1 class="font-title text-xl md:text-2xl text-pink-500 tracking-wide">쑥쑥 어휘 왕국</h1>
+        <p class="text-xs text-gray-500 font-bold">재미있는 맞춤법 & 띄어쓰기 탐험</p>
+      </div>
+    </div>
+
+    <div id="userBadge" class="hidden items-center space-x-2 bg-amber-100 border-2 border-amber-300 px-4 py-1.5 rounded-2xl">
+      <span class="text-xl">🎒</span>
+      <span id="badgeText" class="font-title text-base md:text-lg text-amber-900"></span>
+      <button onclick="changeUser()" class="ml-2 text-xs bg-white hover:bg-amber-200 text-amber-800 font-bold px-2 py-1 rounded-lg border border-amber-300 transition">변경</button>
+    </div>
+  </header>
+
+  <!-- 메인 컨테이너 -->
+  <main class="max-w-4xl w-full mx-auto flex-grow flex flex-col justify-center">
+
+    <!-- 1. 로그인 / 시작 화면 -->
+    <section id="screen-login" class="pastel-card rounded-3xl p-6 md:p-10 text-center max-w-xl mx-auto w-full">
+      <div class="character-float inline-block mb-4">
+        <svg class="w-28 h-28 mx-auto" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="30" cy="32" r="16" fill="#FFCAD4" stroke="#5E503F" stroke-width="4"/>
+          <circle cx="30" cy="32" r="8" fill="#F4ACB7"/>
+          <circle cx="90" cy="32" r="16" fill="#FFCAD4" stroke="#5E503F" stroke-width="4"/>
+          <circle cx="90" cy="32" r="8" fill="#F4ACB7"/>
+          <circle cx="60" cy="65" r="42" fill="#FFE5EC" stroke="#5E503F" stroke-width="4"/>
+          <ellipse cx="44" cy="58" rx="5" ry="6" fill="#2B2D42"/>
+          <circle cx="42" cy="56" r="2" fill="white"/>
+          <ellipse cx="76" cy="58" rx="5" ry="6" fill="#2B2D42"/>
+          <circle cx="74" cy="56" r="2" fill="white"/>
+          <ellipse cx="34" cy="68" rx="7" ry="4" fill="#FF8FA3" opacity="0.6"/>
+          <ellipse cx="86" cy="68" rx="7" ry="4" fill="#FF8FA3" opacity="0.6"/>
+          <ellipse cx="60" cy="68" rx="14" ry="11" fill="#FFF0F3"/>
+          <ellipse cx="60" cy="64" rx="5" ry="4" fill="#5E503F"/>
+          <path d="M55 71C57 74 63 74 65 71" stroke="#5E503F" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M60 12L90 24L60 36L30 24L60 12Z" fill="#70D6FF" stroke="#5E503F" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M84 27V40" stroke="#FF9770" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <h2 class="font-title text-2xl md:text-3xl text-gray-800 mb-2">안녕! 나는 어휘 요정 '모모'야 🐾</h2>
+      <p class="text-base md:text-lg text-gray-600 font-bold mb-6">
+        우리 함께 헷갈리는 맞춤법과 띄어쓰기를 정복해 볼까?<br>
+        시작하기 전에 <span class="text-pink-500 underline decoration-wavy">학번과 이름</span>을 알려줘!
+      </p>
+
+      <div class="space-y-4 text-left max-w-sm mx-auto">
+        <div>
+          <label class="block font-title text-lg text-gray-700 mb-1">🔢 학번 (또는 번호)</label>
+          <input type="text" id="inputStudentId" placeholder="예: 30105 또는 5번" 
+            class="w-full px-4 py-3.5 text-lg font-bold rounded-2xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none bg-pink-50/40 text-gray-800 placeholder-gray-400">
+        </div>
+        <div>
+          <label class="block font-title text-lg text-gray-700 mb-1">😊 이름</label>
+          <input type="text" id="inputStudentName" placeholder="예: 홍길동" 
+            class="w-full px-4 py-3.5 text-lg font-bold rounded-2xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none bg-pink-50/40 text-gray-800 placeholder-gray-400"
+            onkeyup="if(event.key === 'Enter') startApp()">
+        </div>
+        <button onclick="startApp()" class="btn-bounce w-full mt-4 bg-gradient-to-r from-pink-400 to-rose-400 hover:from-pink-500 hover:to-rose-500 text-white font-title text-2xl py-4 rounded-2xl shadow-md border-b-4 border-rose-500">
+          어휘 왕국 입장하기 🚀
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. 장(Chapter) 선택 화면 -->
+    <section id="screen-chapters" class="hidden space-y-6">
+      <div class="bg-gradient-to-r from-amber-100 via-rose-100 to-teal-100 border-2 border-white rounded-3xl p-5 flex flex-col md:flex-row items-center justify-between shadow-sm">
+        <div class="flex items-center space-x-4 mb-3 md:mb-0">
+          <div class="text-5xl character-float">🧚‍♀️</div>
+          <div>
+            <h2 class="font-title text-xl md:text-2xl text-gray-800">오늘 공부할 장(Chapter)을 골라봐!</h2>
+            <p class="text-sm md:text-base text-gray-700 font-bold">
+              먼저 <span class="text-teal-700 bg-teal-100 px-2 py-0.5 rounded-lg">[개념 학습]</span>으로 단어를 익히고, <span class="text-rose-600 bg-rose-100 px-2 py-0.5 rounded-lg">[퀴즈 도전]</span>을 풀면 선생님의 시트에 자동 저장돼!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div id="chapterGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </section>
+
+    <!-- 3. 학습 & 퀴즈 통합 화면 -->
+    <section id="screen-workspace" class="hidden pastel-card rounded-3xl p-5 md:p-8">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 mb-6 border-b-2 border-dashed border-pink-200">
+        <div class="flex items-center space-x-3">
+          <button onclick="goHome()" class="btn-bounce bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-3.5 py-2 rounded-xl text-sm flex items-center gap-1">
+            ⬅️ 목록으로
+          </button>
+          <span id="currentChapterIcon" class="text-3xl"></span>
+          <div>
+            <span id="currentChapterBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700"></span>
+            <h2 id="currentChapterTitle" class="font-title text-2xl md:text-3xl text-gray-800"></h2>
+          </div>
+        </div>
+
+        <div class="flex bg-amber-50 p-1.5 rounded-2xl border-2 border-amber-200 self-start md:self-auto">
+          <button id="tabBtnStudy" onclick="switchMode('study')" class="font-title text-lg px-5 py-2 rounded-xl transition flex items-center gap-1.5">
+            📖 1단계: 개념 학습
+          </button>
+          <button id="tabBtnQuiz" onclick="switchMode('quiz')" class="font-title text-lg px-5 py-2 rounded-xl transition flex items-center gap-1.5">
+            ✏️ 2단계: 퀴즈 도전
+          </button>
+        </div>
+      </div>
+
+      <!-- [모드 A] 개념 학습 뷰 -->
+      <div id="view-study" class="space-y-5">
+        <div class="bg-teal-50 border-2 border-teal-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center space-x-3">
+            <span class="text-3xl">🦉</span>
+            <div>
+              <p class="font-title text-lg text-teal-900">부엉이 선생님의 핵심 어휘 사전!</p>
+              <p class="text-sm text-teal-800 font-bold">카드를 하나씩 읽으며 헷갈리는 낱말을 눈에 익혀 보세요. 다 읽었으면 오른쪽 [퀴즈 풀기] 버튼을 누르세요!</p>
+            </div>
+          </div>
+          <button onclick="switchMode('quiz')" class="btn-bounce shrink-0 bg-rose-400 hover:bg-rose-500 text-white font-title text-lg px-5 py-3 rounded-2xl shadow border-b-4 border-rose-600">
+            공부 완료! 퀴즈 풀기 👉
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between gap-2">
+          <span id="studyItemCount" class="font-title text-base text-gray-600"></span>
+          <input type="text" id="studySearchInput" oninput="filterStudyCards()" placeholder="🔍 찾고 싶은 낱말 검색..." 
+            class="px-4 py-2 rounded-xl border-2 border-teal-200 focus:border-teal-400 focus:outline-none text-sm font-bold w-56 bg-white">
+        </div>
+
+        <div id="studyCardList" class="grid grid-cols-1 md:grid-cols-2 gap-3.5 max-h-[55vh] overflow-y-auto pr-1"></div>
+      </div>
+
+      <!-- [모드 B] 퀴즈 도전 뷰 -->
+      <div id="view-quiz" class="hidden">
+        <div class="mb-6">
+          <div class="flex justify-between items-center mb-2">
+            <span id="quizProgressText" class="font-title text-lg text-pink-600">문제 1 / 10</span>
+            <div class="flex items-center space-x-3">
+              <button onclick="toggleStudyPeek()" class="text-sm font-bold bg-teal-100 hover:bg-teal-200 text-teal-800 px-3 py-1.5 rounded-xl border border-teal-300 transition">
+                💡 힌트 사전 잠깐 보기
+              </button>
+              <span id="quizScoreBadge" class="font-title text-lg bg-amber-100 text-amber-800 px-3.5 py-1 rounded-xl border border-amber-300">현재 0점</span>
+            </div>
+          </div>
+          <div class="w-full bg-gray-200 h-4 rounded-full overflow-hidden p-0.5">
+            <div id="quizProgressBar" class="bg-gradient-to-r from-pink-400 to-amber-400 h-full rounded-full transition-all duration-300" style="width: 10%"></div>
+          </div>
+        </div>
+
+        <div id="peekStudyBox" class="hidden mb-5 bg-teal-50 border-2 border-teal-300 rounded-2xl p-4">
+          <div class="flex justify-between items-center mb-2">
+            <span class="font-title text-base text-teal-900">📖 헷갈릴 땐 개념을 확인하며 배워요!</span>
+            <button onclick="toggleStudyPeek()" class="text-xs font-bold bg-white px-2.5 py-1 rounded-lg border border-teal-300 text-teal-800">닫기 ✖</button>
+          </div>
+          <div id="peekStudyContent" class="max-h-40 overflow-y-auto text-sm space-y-1.5 pr-2"></div>
+        </div>
+
+        <div class="bg-amber-50/70 border-4 border-amber-200 rounded-3xl p-6 md:p-8 mb-6 relative">
+          <div class="flex items-center space-x-3 mb-3">
+            <span id="quizCharEmoji" class="text-4xl">🐰</span>
+            <span id="quizItemNumberTag" class="font-title text-sm bg-amber-200 text-amber-900 px-3 py-1 rounded-full">교재 항목</span>
+          </div>
+          <h3 id="quizQuestionText" class="font-title text-2xl md:text-3xl text-gray-800 leading-snug break-keep">
+            문제가 여기에 표시됩니다.
+          </h3>
+        </div>
+
+        <div id="quizOptionsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"></div>
+
+        <div id="quizFeedbackBox" class="hidden rounded-2xl p-5 mb-4 border-2 transition-all">
+          <div class="flex items-start space-x-3">
+            <span id="feedbackEmoji" class="text-3xl">🎉</span>
+            <div class="flex-grow">
+              <h4 id="feedbackTitle" class="font-title text-xl mb-1">정답입니다!</h4>
+              <p id="feedbackDesc" class="text-base font-bold text-gray-700 leading-relaxed"></p>
+            </div>
+          </div>
+          <div class="mt-4 text-right">
+            <button id="nextQuestionBtn" onclick="nextQuestion()" class="btn-bounce bg-gray-800 hover:bg-gray-900 text-white font-title text-xl px-7 py-3 rounded-2xl shadow">
+              다음 문제로 ➡️
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- [모드 C] 퀴즈 완료 및 구글 시트 제출 화면 -->
+      <div id="view-result" class="hidden text-center py-6 space-y-6">
+        <div class="character-float text-6xl" id="resultEmoji">🏆</div>
+        <div>
+          <span id="resultChapterName" class="font-bold text-sm bg-pink-100 text-pink-700 px-3 py-1 rounded-full"></span>
+          <h3 class="font-title text-3xl md:text-4xl text-gray-800 mt-2" id="resultTitle">참 잘했어요!</h3>
+          <p class="text-lg font-bold text-gray-600 mt-1" id="resultSubtitle"></p>
+        </div>
+
+        <div class="max-w-md mx-auto bg-gradient-to-br from-amber-50 to-pink-50 border-4 border-pink-200 rounded-3xl p-6 shadow-inner">
+          <p class="font-title text-lg text-gray-600">나의 최종 점수</p>
+          <p class="font-title text-6xl text-rose-500 my-2" id="resultScoreText">100점</p>
+          <p class="font-bold text-gray-700" id="resultDetailCount">10문제 중 10문제 정답!</p>
+        </div>
+
+        <div id="sheetSubmitStatus" class="max-w-lg mx-auto rounded-2xl p-4 border-2 bg-blue-50 border-blue-200 text-blue-900 font-bold flex items-center justify-center space-x-3">
+          <span class="animate-spin text-2xl">⏳</span>
+          <span>구글 시트 <b>'파일제출'</b> 탭에 결과를 저장하고 있어요...</span>
+        </div>
+
+        <div id="reviewNoteContainer" class="max-w-2xl mx-auto text-left hidden">
+          <h4 class="font-title text-xl text-gray-800 mb-3 flex items-center gap-2">
+            <span>📝</span> 내가 푼 문제 다시 보기
+          </h4>
+          <div id="reviewList" class="space-y-2.5 max-h-60 overflow-y-auto pr-1"></div>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-4 pt-2">
+          <button onclick="startQuiz()" class="btn-bounce bg-amber-400 hover:bg-amber-500 text-amber-950 font-title text-xl px-6 py-3.5 rounded-2xl border-b-4 border-amber-600">
+            🔄 새로운 문제로 다시 도전
+          </button>
+          <button onclick="goHome()" class="btn-bounce bg-teal-400 hover:bg-teal-500 text-teal-950 font-title text-xl px-6 py-3.5 rounded-2xl border-b-4 border-teal-600">
+            🏰 다른 장 공부하러 가기
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="max-w-4xl w-full mx-auto text-center text-xs md:text-sm text-gray-500 font-bold mt-6 py-2">
+    🌱 쑥쑥 어휘 왕국 | 퀴즈를 끝까지 풀면 구글 시트 [파일제출] 탭에 '학번, 이름, 학습일시, 결과'가 자동 기록됩니다.
+  </footer>
+
+  <script>
+    /**
+     * ============================================================================
+     * ⭐ [가장 중요] 깃허브 페이지(GitHub Pages)와 내 구글 시트를 연결하는 주소칸 ⭐
+     * 구글 시트의 [확장 프로그램 > Apps Script > 배포 > 새 배포]에서 복사한
+     * '웹 앱 URL (https://script.google.com/macros/s/.../exec)'을 아래 따옴표 안에 붙여넣으세요!
+     * ============================================================================
+     */
+    const GOOGLE_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyRrHvdNKukBMkLE7ojAb95i3Af3KsxRLr4RnUDvtkq8HJgQogQ_5SYtwlIOpg6ACc/exec";
+
+    const CHAPTER_DATA = [
+      {
+        id: 1,
+        badge: "제1장 (01~40)",
+        title: "발음이 비슷한 말",
+        subtitle: "소리는 비슷하지만 뜻이 완전히 다른 낱말 구별하기",
+        icon: "👧",
+        bgClass: "from-pink-100 to-rose-100 border-pink-300",
+        btnClass: "bg-rose-400 hover:bg-rose-500 text-white",
+        studyItems: [
+          { no: "01", title: "모래 vs 모레", desc: "<b>모래</b>: 바닷가나 강가의 잘고 반짝이는 알갱이<br><b>모레</b>: 내일의 다음 날" },
+          { no: "02", title: "덥다 vs 덮다", desc: "<b>덥다</b>: 기온이 높아 몸에 느끼는 열기가 있다<br><b>덮다</b>: 이불이나 뚜껑 따위를 씌우거나 포개다" },
+          { no: "03", title: "이따가 vs 있다가", desc: "<b>이따가</b>: 조금 지난 뒤에 (시간)<br><b>있다가</b>: 어느 장소에 머물러 있다가 (상태·장소)" },
+          { no: "04", title: "맞다 vs 맡다", desc: "<b>맞다</b>: 문제의 답이 틀리지 않다 / 비나 눈을 맞다<br><b>맡다</b>: 냄새를 맡다 / 어떤 역할이나 일을 책임지다" },
+          { no: "05", title: "때 vs 떼", desc: "<b>때</b>: 시간이나 시각 / 옷이나 몸에 묻은 더러운 먼지<br><b>떼</b>: 여럿이 모인 무리 / 억지로 우기는 생떼" },
+          { no: "06", title: "매다 vs 메다", desc: "<b>매다</b>: 신발 끈이나 넥타이를 묶다<br><b>메다</b>: 가방 등을 어깨에 걸치다" },
+          { no: "07", title: "낫다 vs 낮다", desc: "<b>낫다</b>: 병이 고쳐지다 / 더 좋다<br><b>낮다</b>: 높이가 아래쪽이다" },
+          { no: "08", title: "업다 vs 없다", desc: "<b>업다</b>: 아기 등을 등에 매달다<br><b>없다</b>: 존재하지 않다" },
+          { no: "09", title: "부치다 vs 붙이다", desc: "<b>부치다</b>: 편지·소포를 보내다 / 부침개를 굽다 / 부채질하다<br><b>붙이다</b>: 우표나 스티커를 떨어지지 않게 하다" },
+          { no: "10", title: "시키다 vs 식히다", desc: "<b>시키다</b>: 어떤 일을 하게 하다 / 음식을 주문하다<br><b>식히다</b>: 뜨거운 것을 차갑게 하다" },
+          { no: "11", title: "빗 vs 빚 vs 빛", desc: "<b>빗</b>: 머리카락을 빗는 도구<br><b>빚</b>: 갚아야 할 빌린 돈<br><b>빛</b>: 밝게 비추는 광선(햇빛, 별빛)" },
+          { no: "12", title: "다치다 vs 닫히다", desc: "<b>다치다</b>: 몸에 상처를 입다<br><b>닫히다</b>: 열려 있던 문이나 창문이 닫아지다" },
+          { no: "13", title: "낫 vs 낮 vs 낯", desc: "<b>낫</b>: 풀이나 곡식을 베는 농기구<br><b>낮</b>: 해가 떠 있는 환한 시간<br><b>낯</b>: 사람의 얼굴 (낯이 익다)" },
+          { no: "14", title: "짓다 vs 짖다", desc: "<b>짓다</b>: 밥을 짓다, 집을 짓다, 미소를 짓다<br><b>짖다</b>: 강아지가 멍멍 소리를 내다" },
+          { no: "15", title: "반드시 vs 반듯이", desc: "<b>반드시</b>: 틀림없이 꼭 (약속을 반드시 지키다)<br><b>반듯이</b>: 모양이나 자세가 기울지 않고 바르게" },
+          { no: "16", title: "젓다 vs 젖다", desc: "<b>젓다</b>: 국을 숟가락으로 젓다 / 노를 젓다 / 손을 흔들다<br><b>젖다</b>: 물이 스며들어 축축해지다" },
+          { no: "17", title: "갖다 vs 같다", desc: "<b>갖다</b>: 손에 쥐거나 지니다('가지다'의 준말)<br><b>같다</b>: 서로 다르지 않고 비슷하다" },
+          { no: "18", title: "새다 vs 세다", desc: "<b>새다</b>: 물이나 가스가 빠져나가다 / 날이 밝아 오다<br><b>세다</b>: 힘이 강하다 / 숫자를 헤아리다 / 머리카락이 하얘지다" },
+          { no: "19", title: "지그시 vs 지긋이", desc: "<b>지그시</b>: 눈을 슬며시 감거나 조용히 힘을 주는 모양<br><b>지긋이</b>: 나이가 비교적 많아 듬직하게 / 끈기 있게 참는 모양" },
+          { no: "20", title: "빗다 vs 빚다", desc: "<b>빗다</b>: 빗으로 머리를 단정하게 정리하다<br><b>빚다</b>: 만두나 송편, 도자기를 만들다" },
+          { no: "24", title: "느리다 vs 늦다", desc: "<b>느리다</b>: 움직이는 속도가 빠르지 않다<br><b>늦다</b>: 정해진 시간보다 지나다" },
+          { no: "25", title: "가르치다 vs 가리키다", desc: "<b>가르치다</b>: 지식이나 방법을 알려 주다<br><b>가리키다</b>: 손가락 등으로 방향이나 대상을 콕 집어 보이다" },
+          { no: "26", title: "다르다 vs 틀리다", desc: "<b>다르다</b>: 서로 같지 않다 (비교)<br><b>틀리다</b>: 계산이나 답이 바르지 못하고 어긋나다" },
+          { no: "27", title: "잃다 vs 잊다", desc: "<b>잃다</b>: 가졌던 물건을 놓치다 / 길을 잃다<br><b>잊다</b>: 기억하지 못하다" },
+          { no: "28", title: "들리다 vs 들르다", desc: "<b>들리다</b>: 소리가 귀에 들어오다<br><b>들르다</b>: 지나는 길에 잠깐 들어가 머무르다" },
+          { no: "29", title: "맞추다 vs 맞히다", desc: "<b>맞추다</b>: 퍼즐 조각이나 줄을 서로 맞게 하다<br><b>맞히다</b>: 퀴즈의 정답을 알아맞히다 / 과녁에 화살을 맞히다" },
+          { no: "30", title: "바라다 vs 바래다", desc: "<b>바라다</b>: 소원이 이루어지기를 원하다<br><b>바래다</b>: 햇볕이나 물에 색깔이 희미해지다" },
+          { no: "31", title: "-장이 vs -쟁이", desc: "<b>-장이</b>: 기술자(대장장이, 미장이)<br><b>-쟁이</b>: 성질이나 버릇이 많은 사람(겁쟁이, 욕심쟁이)" },
+          { no: "32", title: "담다 vs 담그다", desc: "<b>담다</b>: 그릇이나 바구니에 물건을 넣다<br><b>담그다</b>: 물에 잠기게 하다 / 김치나 장을 만들다" },
+          { no: "33", title: "한참 vs 한창", desc: "<b>한참</b>: 시간이 상당히 오래 걸리는 동안<br><b>한창</b>: 어떤 일이 가장 활발하고 왕성한 때" },
+          { no: "34", title: "젖히다 vs 제치다", desc: "<b>젖히다</b>: 고개나 몸을 뒤로 기울이다<br><b>제치다</b>: 경기에서 상대방을 이기고 앞서 나가다" },
+          { no: "35", title: "골다 vs 곪다", desc: "<b>골다</b>: 잠을 자면서 코를 골다<br><b>곪다</b>: 상처에 고름이 생기다" },
+          { no: "36", title: "껍데기 vs 껍질", desc: "<b>껍데기</b>: 달걀이나 조개처럼 딱딱한 겉 부분<br><b>껍질</b>: 사과나 귤처럼 무르고 부드러운 겉 부분" },
+          { no: "37", title: "비추다 vs 비치다", desc: "<b>비추다</b>: 손전등이나 거울로 빛을 보내다<br><b>비치다</b>: 물속이나 거울에 모습이 나타나다" },
+          { no: "38", title: "부수다 vs 부시다", desc: "<b>부수다</b>: 단단한 물건을 깨뜨려 망가뜨리다<br><b>부시다</b>: 빛이 강해 눈이 부시다 / 그릇을 물로 깨끗이 씻다" },
+          { no: "39", title: "늘이다 vs 늘리다", desc: "<b>늘이다</b>: 고무줄이나 엿가락처럼 길이를 길게 하다<br><b>늘리다</b>: 수나 양, 실력, 시간을 더 많아지게 하다" },
+          { no: "40", title: "벌이다 vs 벌리다", desc: "<b>벌이다</b>: 잔치나 행사, 사업을 시작하여 펼치다<br><b>벌리다</b>: 입이나 양팔의 사이를 넓히다" }
+        ],
+        quizPool: [
+          { tag: "01. 모래, 모레", q: "내일이 화요일이면 ( ? )는 수요일이야.", options: ["모래", "모레"], answer: 1, exp: "'내일의 다음 날'은 '모레'라고 써요. 바닷가의 알갱이는 '모래'예요." },
+          { tag: "02. 덥다, 덮다", q: "잠을 잘 때는 감기에 걸리지 않게 이불을 꼭 ( ? ) 자야 해.", options: ["덥고", "덮고"], answer: 1, exp: "이불이나 뚜껑을 씌우는 것은 '덮다(덮고)'라고 써요." },
+          { tag: "03. 이따가, 있다가", q: "지금은 숙제 중이니까 조금 ( ? ) 오후 3시에 만나자!", options: ["이따가", "있다가"], answer: 0, exp: "'조금 지난 뒤에(시간)'라는 뜻일 때는 '이따가'가 맞아요." },
+          { tag: "04. 맞다, 맡다", q: "우리 반에서 급식 당번 역할을 ( ? ) 열심히 봉사했다.", options: ["맞아", "맡아"], answer: 1, exp: "어떤 역할이나 임무를 책임지는 것은 '맡다(맡아)'예요." },
+          { tag: "06. 매다, 메다", q: "학교에 가려고 책가방을 양쪽 어깨에 ( ? ).", options: ["멨다", "맸다"], answer: 0, exp: "어깨에 가방을 걸치는 것은 '메다(멨다)'이고, 신발 끈을 묶는 것은 '매다'예요." },
+          { tag: "07. 낫다, 낮다", q: "약을 먹고 푹 쉬었더니 감기가 씻은 듯이 ( ? ).", options: ["나았다", "낮았다"], answer: 0, exp: "병이 고쳐지거나 더 좋다는 뜻은 '낫다(나았다)'라고 써요." },
+          { tag: "09. 부치다, 붙이다", q: "할머니께 드릴 편지에 우표를 단단히 ( ? ) 우체통에 넣었다.", options: ["부쳐서", "붙여서"], answer: 1, exp: "우표나 스티커가 떨어지지 않게 하는 것은 '붙이다(붙여서)'예요." },
+          { tag: "10. 시키다, 식히다", q: "뜨거운 국을 후후 불어서 ( ? ) 먹었다.", options: ["시켜", "식혀"], answer: 1, exp: "뜨거운 것을 차갑게 만드는 것은 '식히다(식혀)'예요." },
+          { tag: "11. 빗, 빚, 빛", q: "아침에 일어나 거울을 보며 ( ? )으로 머리카락을 단정하게 정돈했다.", options: ["빗", "빚", "빛"], answer: 0, exp: "머리를 빗는 도구는 '빗', 빌린 돈은 '빚', 밝은 광선은 '빛'이에요." },
+          { tag: "15. 반드시, 반듯이", q: "친구와 한 약속은 무슨 일이 있어도 ( ? ) 지켜야 한다.", options: ["반드시", "반듯이"], answer: 0, exp: "'틀림없이 꼭'이라는 뜻은 '반드시'예요. 모양이 바른 것은 '반듯이'예요." },
+          { tag: "25. 가르치다, 가리키다", q: "나침반의 빨간 바늘은 항상 북쪽 방향을 ( ? ).", options: ["가르친다", "가리킨다"], answer: 1, exp: "방향이나 대상을 콕 집어 보이는 것은 '가리키다(가리킨다)'예요." },
+          { tag: "26. 다르다, 틀리다", q: "나와 내 동생은 쌍둥이지만 좋아하는 음식이 서로 ( ? ).", options: ["다르다", "틀리다"], answer: 0, exp: "서로 같지 않고 차이가 있을 때는 '다르다'를 써야 해요." },
+          { tag: "28. 들리다, 들르다", q: "집에 가는 길에 문구점에 잠깐 ( ? ) 공책을 샀다.", options: ["들러", "들려"], answer: 0, exp: "지나는 길에 잠깐 들어가 머무르는 것은 기본형이 '들르다'이므로 '들러'가 맞아요." },
+          { tag: "29. 맞추다, 맞히다", q: "선생님이 내신 어려운 수수께끼의 정답을 단번에 ( ? )!", options: ["맞추었다", "맞혔다"], answer: 1, exp: "퀴즈나 문제의 정답을 알아맞히는 것은 '맞히다(맞혔다)'예요." },
+          { tag: "36. 껍데기, 껍질", q: "달콤한 귤의 ( ? )을 까서 동생과 사이좋게 나누어 먹었다.", options: ["껍데기", "껍질"], answer: 1, exp: "과일처럼 무른 겉 부분은 '껍질', 조개나 달걀처럼 딱딱한 것은 '껍데기'예요." },
+          { tag: "39. 늘이다, 늘리다", q: "매일 책을 읽었더니 아는 어휘의 수가 많이 ( ? ).", options: ["늘어났다(늘리다)", "늘여졌다(늘이다)"], answer: 0, exp: "수나 양, 실력을 많아지게 하는 것은 '늘리다'예요." }
+        ]
+      },
+      {
+        id: 2,
+        badge: "제2장 (21~23)",
+        title: "헷갈리는 말",
+        subtitle: "문장 속에서 쓰임이 헷갈리기 쉬운 부사와 형용사",
+        icon: "🐢",
+        bgClass: "from-emerald-100 to-teal-100 border-emerald-300",
+        btnClass: "bg-emerald-500 hover:bg-emerald-600 text-white",
+        studyItems: [
+          { no: "21", title: "안 vs 못", desc: "<b>안 (아니)</b>: 스스로 할 마음이 없어서 하지 않을 때 (예: 밥을 안 먹다)<br><b>못</b>: 실력이나 다른 이유 때문에 할 수 없을 때 (예: 배가 아파서 밥을 못 먹다)" },
+          { no: "22", title: "작다 vs 적다", desc: "<b>작다</b>: 길이, 넓이, 부피, 키, 목소리 등의 크기가 크지 않다 (반대말: 크다)<br><b>적다</b>: 수나 양이 많지 않다 (반대말: 많다)" },
+          { no: "23", title: "빨리 vs 일찍", desc: "<b>빨리</b>: 움직이는 속도가 느리지 않게, 걸리는 시간이 짧게 (반대말: 천천히)<br><b>일찍</b>: 정해진 시간보다 이르게 (반대말: 늦게)" }
+        ],
+        quizPool: [
+          { tag: "21. 안, 못", q: "자전거를 타고 싶었지만 밖에 비가 많이 와서 타지 ( ? )했다.", options: ["안", "못"], answer: 1, exp: "하고 싶지만 날씨 등 다른 이유 때문에 할 수 없을 때는 '못'을 써요." },
+          { tag: "21. 안, 못", q: "배가 부르니까 간식은 내 마음대로 ( ? ) 먹을래요.", options: ["안", "못"], answer: 0, exp: "스스로의 의지(마음)로 하지 않는 것은 '안'을 써요." },
+          { tag: "22. 작다, 적다", q: "작년에 입던 옷이 키가 자라서 이제는 너무 ( ? ).", options: ["작다", "적다"], answer: 0, exp: "옷의 크기나 키를 말할 때는 '크다'의 반대말인 '작다'를 써요." },
+          { tag: "22. 작다, 적다", q: "오늘 도서관에는 비가 와서인지 사람이 평소보다 ( ? ).", options: ["작다", "적다"], answer: 1, exp: "사람의 수나 물건의 양이 많지 않을 때는 '많다'의 반대말인 '적다'를 써요." },
+          { tag: "22. 작다, 적다", q: "교실에서는 친구들을 배려해 목소리를 ( ? ) 낮추어 말해요.", options: ["작게", "적게"], answer: 0, exp: "소리의 크기는 '작다(작게)'로 표현해요." },
+          { tag: "23. 빨리, 일찍", q: "내일 현장체험학습에 늦지 않으려고 오늘 밤에는 ( ? ) 잠자리에 들었다.", options: ["빨리", "일찍"], answer: 1, exp: "'늦게'의 반대말로 어떤 시각보다 이르게 행동할 때는 '일찍'을 써요." },
+          { tag: "23. 빨리, 일찍", q: "치타는 초원에서 가장 ( ? ) 달릴 수 있는 동물이다.", options: ["빨리", "일찍"], answer: 0, exp: "달리는 속도가 빠르다는 뜻일 때는 '천천히'의 반대말인 '빨리'를 써요." },
+          { tag: "23. 빨리, 일찍", q: "아침 6시에 누구보다 ( ? ) 일어나서 상쾌한 공기를 마셨다.", options: ["빨리", "일찍"], answer: 1, exp: "이른 시각에 일어나는 것은 '일찍' 일어나다라고 해요." }
+        ]
+      },
+      {
+        id: 3,
+        badge: "제3장 (41~60)",
+        title: "틀리기 쉬운 말",
+        subtitle: "소리 나는 대로 쓰다가 틀리기 쉬운 우리말 맞춤법 (O/X)",
+        icon: "🎭",
+        bgClass: "from-amber-100 to-yellow-100 border-amber-300",
+        btnClass: "bg-amber-500 hover:bg-amber-600 text-white",
+        studyItems: [
+          { no: "41", title: "시월 (O) / 십월 (X)", desc: "열 번째 달은 발음과 표기 모두 <b>'시월'</b>이 맞아요. (유월, 시월)" },
+          { no: "42", title: "며칠 (O) / 몇일 (X)", desc: "'몇 월 며칠'처럼 날짜를 묻거나 말할 때는 언제나 <b>'며칠'</b>로만 써요." },
+          { no: "43", title: "열심히 (O) / 열심이 (X)", desc: "정성을 다하여 부지런하게라는 뜻은 <b>'열심히'</b>가 맞아요." },
+          { no: "44", title: "깨끗이 (O) / 깨끗히 (X)", desc: "받침 'ㅅ' 뒤에는 '-이'를 붙여서 <b>'깨끗이'</b>라고 써요." },
+          { no: "45", title: "인사말 (O) / 인삿말 (X)", desc: "사이시옷을 넣지 않고 <b>'인사말'</b>(머리말, 소개말)로 써요." },
+          { no: "46", title: "수돗물 (O) / 수도물 (X)", desc: "수도를 통해 나오는 물은 사이시옷을 넣어 <b>'수돗물'</b>이라고 써요." },
+          { no: "47", title: "오랜만 (O) / 오랫만 (X)", desc: "'오래간만'의 준말이므로 'ㄴ' 받침인 <b>'오랜만'</b>이 맞아요." },
+          { no: "48", title: "설거지 (O) / 설겆이 (X)", desc: "먹고 난 그릇을 씻는 일은 소리 나는 대로 <b>'설거지'</b>라고 써요." },
+          { no: "49", title: "찌개 (O) / 찌게 (X)", desc: "김치찌개, 된장찌개는 'ㅐ'를 써서 <b>'찌개'</b>가 맞아요." },
+          { no: "50", title: "휴게소 (O) / 휴계소 (X)", desc: "길을 가다 잠시 쉬는 곳은 <b>'휴게소'</b>(휴게실)예요." },
+          { no: "51", title: "발자국 (O) / 발자욱 (X)", desc: "발이 닿은 자리에 남은 흔적은 <b>'발자국'</b>이에요." },
+          { no: "52", title: "베개 (O) / 베게 (X)", desc: "잠잘 때 머리를 괴는 물건은 <b>'베개'</b>예요." },
+          { no: "53", title: "웃어른 (O) / 윗어른 (X)", desc: "나이가 많거나 지위가 높은 어른은 <b>'웃어른'</b>이라고 해요." },
+          { no: "54", title: "역할 (O) / 역활 (X)", desc: "자기가 마땅히 해야 할 맡은 일은 <b>'역할'</b>이에요." },
+          { no: "55", title: "설렘 (O) / 설레임 (X)", desc: "기본형이 '설레다'이므로 명사형은 <b>'설렘'</b>이 맞아요." },
+          { no: "56", title: "통째로 (O) / 통채로 (X)", desc: "나누지 않고 고스란히 전체를 뜻할 때는 <b>'통째로'</b>예요." },
+          { no: "57", title: "일부러 (O) / 일부로 (X)", desc: "어떤 생각이나 목적을 가지고 마음을 먹어서 할 때는 <b>'일부러'</b>예요." },
+          { no: "58", title: "어차피 (O) / 어짜피 (X)", desc: "이러나저러나 마찬가지라는 뜻은 <b>'어차피'</b>가 맞아요." },
+          { no: "59", title: "잠그다 (O) / 잠구다 (X)", desc: "자물쇠나 수도꼭지를 채우는 것은 <b>'잠그다'</b>예요." },
+          { no: "60", title: "드러나다 (O) / 들어나다 (X)", desc: "가려져 있던 사실이나 모습이 나타나는 것은 <b>'드러나다'</b>예요." }
+        ],
+        quizPool: [
+          { tag: "41. 시월 O, 십월 X", q: "가을 단풍이 아름다운 10월은 한글로 어떻게 쓸까요?", options: ["시월", "십월"], answer: 0, exp: "10월은 '십월'이 아니라 '시월'이 올바른 표준어예요." },
+          { tag: "42. 며칠 O, 몇일 X", q: "오늘이 시월 ( ? )인지 달력을 확인해 보았다.", options: ["며칠", "몇일"], answer: 0, exp: "날짜를 나타낼 때는 언제나 '며칠'로만 적어요. '몇일'은 없는 말이에요." },
+          { tag: "44. 깨끗이 O, 깨끗히 X", q: "외출하고 돌아오면 비누로 손을 ( ? ) 씻어야 해요.", options: ["깨끗이", "깨끗히"], answer: 0, exp: "'깨끗하다'처럼 'ㅅ' 받침 뒤에는 '-이'가 붙어 '깨끗이'가 맞아요." },
+          { tag: "45. 인사말 O, 인삿말 X", q: "아침에 선생님을 만나면 밝은 목소리로 ( ? )을 건넨다.", options: ["인사말", "인삿말"], answer: 0, exp: "'인사말', '머리말'에는 사이시옷(ㅅ)을 넣지 않아요." },
+          { tag: "47. 오랜만 O, 오랫만 X", q: "방학이 끝나고 친구들을 ( ? )에 만나서 정말 반가웠다.", options: ["오랜만", "오랫만"], answer: 0, exp: "'오래간만'이 줄어든 말이므로 'ㄴ' 받침인 '오랜만'이 맞아요." },
+          { tag: "48. 설거지 O, 설겆이 X", q: "저녁 식사를 마친 뒤 부모님을 도와 ( ? )를 했다.", options: ["설거지", "설겆이"], answer: 0, exp: "그릇을 씻는 일은 소리 나는 대로 '설거지'라고 적어요." },
+          { tag: "52. 베개 O, 베게 X", q: "푹신한 ( ? )를 베고 누우니 금방 잠이 솔솔 왔다.", options: ["베개", "베게"], answer: 0, exp: "머리를 괴는 물건은 앞글자가 '베', 뒷글자가 '개'인 '베개'예요." },
+          { tag: "53. 웃어른 O, 윗어른 X", q: "명절에 모인 ( ? )들께 공손하게 절을 올렸다.", options: ["웃어른", "윗어른"], answer: 0, exp: "'아래어른'이라는 말이 없으므로 '윗어른'이 아닌 '웃어른'이 맞아요." },
+          { tag: "54. 역할 O, 역활 X", q: "모둠 활동에서 각자 맡은 ( ? )에 최선을 다했다.", options: ["역할", "역활"], answer: 0, exp: "맡은 일은 '역활'이 아니라 '역할'이 올바른 표기예요." },
+          { tag: "55. 설렘 O, 설레임 X", q: "내일 소풍을 간다는 생각에 마음이 두근거리고 ( ? )이 가득했다.", options: ["설렘", "설레임"], answer: 0, exp: "기본형이 '설레다'이므로 명사형은 '설렘'이 맞아요." },
+          { tag: "57. 일부러 O, 일부로 X", q: "친구가 실수한 것이지 절대 ( ? ) 그런 것이 아니야.", options: ["일부러", "일부로"], answer: 0, exp: "일정한 목적이나 생각을 가지고 마음을 먹어서 할 때는 '일부러'라고 써요." },
+          { tag: "59. 잠그다 O, 잠구다 X", q: "양치질을 하는 동안에는 수도꼭지를 꼭 ( ? ) 물을 아껴요.", options: ["잠가서(잠그다)", "잠궈서(잠구다)"], answer: 0, exp: "기본형은 '잠구다'가 아니라 '잠그다(잠가서)'예요." }
+        ]
+      },
+      {
+        id: 4,
+        badge: "제4장 (61~80)",
+        title: "잘못 쓰는 외래어",
+        subtitle: "일상생활에서 잘못 발음하거나 표기하기 쉬운 외래어 바로잡기",
+        icon: "🤖",
+        bgClass: "from-sky-100 to-indigo-100 border-sky-300",
+        btnClass: "bg-sky-500 hover:bg-sky-600 text-white",
+        studyItems: [
+          { no: "61", title: "초콜릿 (O) / 초콜렛 (X)", desc: "달콤한 간식은 <b>'초콜릿'</b>이 올바른 외래어 표기예요." },
+          { no: "62", title: "케이크 (O) / 케익 (X)", desc: "생일에 먹는 빵은 <b>'케이크'</b>라고 적어요." },
+          { no: "63", title: "커피숍 (O) / 커피숖 (X)", desc: "가게를 뜻하는 shop은 <b>'숍(커피숍)'</b>으로 적어요." },
+          { no: "64", title: "주스 (O) / 쥬스 (X)", desc: "'ㅈ' 뒤에는 이중모음(ㅠ)을 쓰지 않아 <b>'주스'</b>가 맞아요." },
+          { no: "65", title: "에어컨 (O) / 에어콘 (X)", desc: "시원한 바람이 나오는 기계는 <b>'에어컨'</b>이에요." },
+          { no: "66", title: "커튼 (O) / 커텐 (X)", desc: "창문에 치는 천은 <b>'커튼'</b>이 맞아요." },
+          { no: "67", title: "돈가스 (O) / 돈까스 (X)", desc: "외래어 표기에는 된소리(ㄲ)를 쓰지 않아 <b>'돈가스'</b>가 맞아요." },
+          { no: "68", title: "수프 (O) / 스프 (X)", desc: "식사 전에 먹는 부드러운 국물 요리는 <b>'수프'</b>예요." },
+          { no: "69", title: "메시지 (O) / 메세지 (X)", desc: "문자나 전하는 말은 <b>'메시지'</b>라고 써요." },
+          { no: "70", title: "소파 (O) / 쇼파 (X)", desc: "거실에 놓는 긴 의자는 <b>'소파'</b>예요." },
+          { no: "71", title: "프라이팬 (O) / 후라이팬 (X)", desc: "요리할 때 쓰는 팬은 <b>'프라이팬'</b>이 맞아요." },
+          { no: "72", title: "로봇 (O) / 로보트 (X)", desc: "스스로 움직이는 기계 인형은 <b>'로봇'</b>이에요." },
+          { no: "73", title: "센티미터 (O) / 센치미터 (X)", desc: "길이의 단위(cm)는 <b>'센티미터'</b>라고 읽고 써요." },
+          { no: "74", title: "사인 (O) / 싸인 (X)", desc: "이름을 적는 서명은 된소리를 쓰지 않고 <b>'사인'</b>이라고 써요." },
+          { no: "75", title: "뷔페 (O) / 부페 (X)", desc: "여러 음식을 골라 먹는 식당은 <b>'뷔페'</b>예요." },
+          { no: "76", title: "도넛 (O) / 도너츠 (X)", desc: "둥글고 가운데 구멍이 뚫린 빵은 <b>'도넛'</b>이에요." },
+          { no: "77", title: "액세서리 (O) / 악세서리 (X)", desc: "몸을 치장하는 장신구는 <b>'액세서리'</b>예요." },
+          { no: "78", title: "마니아 (O) / 매니아 (X)", desc: "어떤 일에 깊이 빠져 좋아하는 사람은 <b>'마니아'</b>예요." },
+          { no: "79", title: "디지털 (O) / 디지탈 (X)", desc: "컴퓨터나 전자기기의 신호 방식은 <b>'디지털'</b>이에요." },
+          { no: "80", title: "리더십 (O) / 리더쉽 (X)", desc: "모둠이나 단체를 이끄는 지도력은 <b>'리더십'</b>이에요." }
+        ],
+        quizPool: [
+          { tag: "61. 초콜릿 O, 초콜렛 X", q: "발렌타인데이에 친구에게 달콤한 ( ? )을 선물했다.", options: ["초콜릿", "초콜렛"], answer: 0, exp: "외래어 표기법에 따라 '초콜렛'이 아니라 '초콜릿'이 맞아요." },
+          { tag: "64. 주스 O, 쥬스 X", q: "신선한 오렌지를 갈아서 만든 오렌지 ( ? )를 마셨다.", options: ["주스", "쥬스"], answer: 0, exp: "외래어에서 'ㅈ, ㅊ' 뒤에는 'ㅑ, ㅕ, ㅛ, ㅠ'를 쓰지 않으므로 '주스'가 맞아요." },
+          { tag: "66. 커튼 O, 커텐 X", q: "아침 햇살이 눈부셔서 창문에 ( ? )을 쳤다.", options: ["커튼", "커텐"], answer: 0, exp: "창문을 가리는 천은 '커텐'이 아니라 '커튼'이 올바른 표기예요." },
+          { tag: "67. 돈가스 O, 돈까스 X", q: "오늘 급식 메뉴로 바삭바삭한 ( ? )와(과) ( ? )가 나왔다.", options: ["돈가스, 수프", "돈까스, 스프"], answer: 0, exp: "외래어 표기에는 된소리를 쓰지 않아 '돈가스'가 맞고, 국물 요리는 '수프'가 맞아요." },
+          { tag: "69. 메시지 O, 메세지 X", q: "어머니께 안전하게 도착했다는 문자 ( ? )를 보냈다.", options: ["메시지", "메세지"], answer: 0, exp: "'메세지'가 아니라 '메시지'가 올바른 표준 외래어예요." },
+          { tag: "70. 소파 O, 쇼파 X", q: "거실에 있는 푹신한 ( ? )에 앉아 텔레비전을 보았다.", options: ["소파", "쇼파"], answer: 0, exp: "거실 의자는 '쇼파'가 아니라 '소파(sofa)'라고 써요." },
+          { tag: "71. 프라이팬 O, 후라이팬 X", q: "달궈진 ( ? )에 식용유를 두르고 달걀프라이를 만들었다.", options: ["프라이팬", "후라이팬"], answer: 0, exp: "요리 도구는 '후라이팬'이 아니라 '프라이팬'이 맞아요." },
+          { tag: "73. 센티미터 O, 센치미터 X", q: "자로 연필의 길이를 재어 보니 정확히 15( ? )였다.", options: ["센티미터", "센치미터"], answer: 0, exp: "길이 단위(cm)는 '센치미터'가 아니라 '센티미터'예요." },
+          { tag: "75. 뷔페 O, 부페 X", q: "가족들과 함께 맛있는 음식이 가득한 ( ? ) 식당에 갔다.", options: ["뷔페", "부페"], answer: 0, exp: "음식을 골라 담아 먹는 식당은 '부페'가 아니라 '뷔페'예요." },
+          { tag: "77. 액세서리 O, 악세서리 X", q: "머리핀과 목걸이 같은 예쁜 ( ? )를 상자에 정리했다.", options: ["액세서리", "악세서리"], answer: 0, exp: "장신구는 '악세서리'가 아니라 '액세서리'라고 표기해요." },
+          { tag: "80. 리더십 O, 리더쉽 X", q: "학급 회장은 친구들의 의견을 잘 모으는 멋진 ( ? )을 발휘했다.", options: ["리더십", "리더쉽"], answer: 0, exp: "-ship은 '-십'으로 적으므로 '리더십'이 올바른 표기예요." }
+        ]
+      },
+      {
+        id: 5,
+        badge: "제5장 (81~100)",
+        title: "꼭 알아야 할 띄어쓰기",
+        subtitle: "의존명사와 조사를 구별하여 띄어쓰기 마스터하기",
+        icon: "👫",
+        bgClass: "from-purple-100 to-fuchsia-100 border-purple-300",
+        btnClass: "bg-purple-500 hover:bg-purple-600 text-white",
+        studyItems: [
+          { no: "81~82", title: "띄어 쓰는 단위 (명, 개)", desc: "숫자나 수 관형사 뒤에서 단위를 나타내는 말은 앞말과 <b>띄어 써요</b>.<br>예: 학생 <b>세 명</b>, 사과 <b>두 개</b>" },
+          { no: "83", title: "띄어 쓰는 '겸'", desc: "두 가지 이상의 뜻을 아우를 때 쓰는 의존명사 '겸'은 양쪽 말과 <b>띄어 써요</b>.<br>예: 아침 <b>겸</b> 점심, 독서도 <b>할 겸</b> 도서관에 갔다." },
+          { no: "84", title: "띄어 쓰는 '동안'", desc: "시간의 길이를 나타내는 '동안'은 앞말과 <b>띄어 써요</b>.<br>예: 방학 <b>동안</b>, 오랫동안(한 단어는 붙여 씀)" },
+          { no: "85", title: "띄어 쓰는 '뻔하다'", desc: "어떤 일이 일어날 가능성이 있음을 뜻할 때는 <b>띄어 써요</b>.<br>예: 넘어질 <b>뻔했다</b>, 지각할 <b>뻔하다</b>" },
+          { no: "86", title: "띄어 쓰는 '거다'", desc: "'것이다'의 준말인 '거다'는 의존명사 '거'가 포함되어 앞말과 <b>띄어 써요</b>.<br>예: 내가 <b>할 거다</b>, 꼭 <b>이길 거다</b>" },
+          { no: "87~88", title: "붙여 쓰는 '대로' vs 띄어 쓰는 '대로'", desc: "• <b>명사(체언) 뒤</b>에서는 조사이므로 <b>붙여 씀</b>: 법<b>대로</b>, 마음<b>대로</b><br>• <b>동사·형용사(관형어) 뒤</b>에서는 의존명사이므로 <b>띄어 씀</b>: 아는 <b>대로</b>, 본 <b>대로</b>" },
+          { no: "89~90", title: "붙여 쓰는 '같이' vs 띄어 쓰는 '같이'", desc: "• <b>명사 뒤</b>에서 '~처럼/함께' 뜻일 때는 조사이므로 <b>붙여 씀</b>: 얼음<b>같이</b> 차갑다, 친구와 <b>같이</b><br>• 주의: '친구와 같이(부사)'는 띄어 쓰고, '천사같이(조사)'는 붙여 써요." },
+          { no: "91", title: "띄어 쓰는 '데'", desc: "장소나 경우, 일을 뜻하는 의존명사 '데'는 앞말과 <b>띄어 써요</b>.<br>예: 앉을 <b>데</b>가 없다, 책을 읽는 <b>데</b> 사흘이 걸렸다." },
+          { no: "92~94", title: "띄어 쓰는 '등, 지, 중'", desc: "• <b>등</b>(그 밖에도): 사과, 배 <b>등</b><br>• <b>지</b>(시간이 흘렀음): 만난 <b>지</b> 일주일<br>• <b>중</b>(~하는 도중): 회의 <b>중</b>, 공부하는 <b>중</b>" },
+          { no: "95~96", title: "붙여 쓰는 '만큼' vs 띄어 쓰는 '만큼'", desc: "• <b>명사 뒤</b>에서는 조사이므로 <b>붙여 씀</b>: 나도 형<b>만큼</b> 잘한다.<br>• <b>동사·형용사 뒤</b>에서는 의존명사이므로 <b>띄어 씀</b>: 노력한 <b>만큼</b> 결과가 좋다." },
+          { no: "97~98", title: "붙여 쓰는 '밖에' vs 띄어 쓰는 '밖에'", desc: "• <b>'그것 말고는 없다(오직)'</b> 뜻일 때는 조사이므로 <b>붙여 씀</b>: 하나<b>밖에</b> 없다.<br>• <b>'바깥쪽(장소)'</b> 뜻일 때는 명사+조사이므로 <b>띄어 씀</b>: 창문 <b>밖에</b> 비가 온다." },
+          { no: "99~100", title: "붙여 쓰는 '뿐' vs 띄어 쓰는 '뿐'", desc: "• <b>명사 뒤</b>에서는 조사이므로 <b>붙여 씀</b>: 믿을 사람은 너<b>뿐</b>이다.<br>• <b>동사·형용사 뒤</b>에서는 의존명사이므로 <b>띄어 씀</b>: 웃기만 할 <b>뿐</b>이다." }
+        ],
+        quizPool: [
+          { tag: "81~82. 띄어 쓰는 명, 개", q: "다음 중 단위를 나타내는 말의 띄어쓰기가 올바른 것은?", options: ["사과 두 개와 친구 세 명", "사과 두개와 친구 세명"], answer: 0, exp: "수 관형사 뒤에 오는 단위 명사(개, 명, 마리, 권 등)는 앞말과 띄어 써야 해요." },
+          { tag: "85. 띄어 쓰는 뻔하다", q: "아침에 늦잠을 자서 하마터면 지각할 ( ? ).", options: ["뻔했다 (띄어 씀)", "뻔했다 (붙여 씀: 지각할뻔했다)"], answer: 0, exp: "관형사형 어미 '-(으)ㄹ' 뒤에 오는 '뻔하다'는 보조 용언이므로 '지각할 뻔했다'처럼 띄어 써요." },
+          { tag: "86. 띄어 쓰는 거다", q: "오늘 방 청소는 내 손으로 직접 ( ? )!", options: ["할 거다", "할거다"], answer: 0, exp: "'거다'는 '것이다'의 준말이므로 앞말과 띄어서 '할 거다'라고 써야 해요." },
+          { tag: "87~88. 대로 띄어쓰기", q: "선생님께서 말씀하신 ( ? ) 차근차근 따라 적어 보았다.", options: ["말씀하신 대로", "말씀하신대로"], answer: 0, exp: "'말씀하신(동사)'처럼 꾸며 주는 말 뒤에 오는 '대로'는 의존명사이므로 띄어 써요. (명사 뒤 '마음대로'는 붙여 씀)" },
+          { tag: "93. 띄어 쓰는 지", q: "강아지를 입양한 ( ? ) 벌써 일 년이 지났다.", options: ["입양한 지", "입양한지"], answer: 0, exp: "어떤 일이 있었던 때로부터 지금까지의 동안을 나타낼 때 쓰는 '지'는 앞말과 띄어 써요." },
+          { tag: "95~96. 만큼 띄어쓰기", q: "땀 흘려 연습한 ( ? ) 운동회에서 멋진 실력을 보여 주었다.", options: ["연습한 만큼", "연습한만큼"], answer: 0, exp: "'연습한'처럼 동사·형용사 뒤에서는 띄어 쓰고, '하늘만큼 땅만큼'처럼 명사 뒤에서는 붙여 써요." },
+          { tag: "95~96. 만큼 띄어쓰기", q: "내 동생도 이제 형( ? ) 키가 훌쩍 자랐다.", options: ["형만큼", "형 만큼"], answer: 0, exp: "'형'이라는 명사 뒤에 붙은 '만큼'은 조사이므로 앞말에 붙여 써요." },
+          { tag: "97~98. 밖에 띄어쓰기", q: "남은 용돈이 천 원( ? ) 없어서 공책을 살 수 없었다.", options: ["원밖에", "원 밖에"], answer: 0, exp: "'그것 말고는 없다'는 뜻으로 뒤에 부정어(없다)가 올 때 '밖에'는 조사이므로 앞말에 붙여 써요." },
+          { tag: "97~98. 밖에 띄어쓰기", q: "교실 ( ? ) 하얀 눈이 펑펑 내리고 있다.", options: ["교실 밖에", "교실밖에"], answer: 0, exp: "안쪽의 반대인 '바깥쪽(장소)'을 뜻할 때는 명사 '밖'이므로 '교실 밖에'로 띄어 써요." },
+          { tag: "99~100. 뿐 띄어쓰기", q: "내가 아는 것은 오직 이름( ? )이고, 소문만 들었을 ( ? )이다.", options: ["이름뿐 / 들었을 뿐", "이름 뿐 / 들었을뿐"], answer: 0, exp: "명사(이름) 뒤에서는 조사이므로 '이름뿐'으로 붙여 쓰고, 동사(들었을) 뒤에서는 의존명사이므로 '들었을 뿐'으로 띄어 써요." }
+        ]
+      }
+    ];
+
+    let currentUser = { studentId: "", name: "" };
+    let currentChapter = null;
+    let currentQuizList = [];
+    let currentQuizIndex = 0;
+    let correctCount = 0;
+    let userAnswersLog = [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedUser = localStorage.getItem('vocab_student_info');
+      if (savedUser) {
+        try {
+          const parsed = JSON.parse(savedUser);
+          if (parsed.studentId && parsed.name) {
+            document.getElementById('inputStudentId').value = parsed.studentId;
+            document.getElementById('inputStudentName').value = parsed.name;
+          }
+        } catch (e) {}
+      }
+      renderChapterGrid();
+    });
+
+    function startApp() {
+      const sId = document.getElementById('inputStudentId').value.trim();
+      const sName = document.getElementById('inputStudentName').value.trim();
+
+      if (!sId || !sName) {
+        alert("학번과 이름을 모두 입력해 주세요! 😊");
+        return;
+      }
+
+      currentUser = { studentId: sId, name: sName };
+      localStorage.setItem('vocab_student_info', JSON.stringify(currentUser));
+
+      document.getElementById('badgeText').textContent = `${currentUser.studentId} ${currentUser.name}`;
+      document.getElementById('userBadge').classList.remove('hidden');
+      document.getElementById('userBadge').classList.add('flex');
+
+      document.getElementById('screen-login').classList.add('hidden');
+      document.getElementById('screen-workspace').classList.add('hidden');
+      document.getElementById('screen-chapters').classList.remove('hidden');
+    }
+
+    function changeUser() {
+      document.getElementById('screen-chapters').classList.add('hidden');
+      document.getElementById('screen-workspace').classList.add('hidden');
+      document.getElementById('screen-login').classList.remove('hidden');
+    }
+
+    function goHome() {
+      if (!currentUser.studentId) {
+        changeUser();
+        return;
+      }
+      document.getElementById('screen-login').classList.add('hidden');
+      document.getElementById('screen-workspace').classList.add('hidden');
+      document.getElementById('screen-chapters').classList.remove('hidden');
+    }
+
+    function renderChapterGrid() {
+      const grid = document.getElementById('chapterGrid');
+      grid.innerHTML = CHAPTER_DATA.map((ch) => `
+        <div class="bg-gradient-to-br ${ch.bgClass} border-4 rounded-3xl p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-title text-sm bg-white/80 text-gray-800 px-3 py-1 rounded-full border border-gray-200">${ch.badge}</span>
+              <span class="text-4xl">${ch.icon}</span>
+            </div>
+            <h3 class="font-title text-2xl md:text-3xl text-gray-800 mb-1">제${ch.id}장. ${ch.title}</h3>
+            <p class="text-sm md:text-base font-bold text-gray-600 mb-5">${ch.subtitle}</p>
+          </div>
+          <div class="grid grid-cols-2 gap-2.5 pt-2">
+            <button onclick="openChapter(${ch.id}, 'study')" class="btn-bounce bg-white hover:bg-gray-50 text-gray-800 font-title text-lg py-3 rounded-2xl border-2 border-gray-300 shadow-sm">
+              📖 개념 학습 (${ch.studyItems.length})
+            </button>
+            <button onclick="openChapter(${ch.id}, 'quiz')" class="btn-bounce ${ch.btnClass} font-title text-lg py-3 rounded-2xl shadow-sm">
+              ✏️ 퀴즈 도전
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openChapter(chapterId, initialMode) {
+      currentChapter = CHAPTER_DATA.find(c => c.id === chapterId);
+      if (!currentChapter) return;
+
+      document.getElementById('screen-chapters').classList.add('hidden');
+      document.getElementById('screen-workspace').classList.remove('hidden');
+
+      document.getElementById('currentChapterIcon').textContent = currentChapter.icon;
+      document.getElementById('currentChapterBadge').textContent = currentChapter.badge;
+      document.getElementById('currentChapterTitle').textContent = `제${currentChapter.id}장. ${currentChapter.title}`;
+
+      document.getElementById('studySearchInput').value = '';
+      renderStudyCards(currentChapter.studyItems);
+      renderPeekStudy(currentChapter.studyItems);
+
+      switchMode(initialMode);
+    }
+
+    function switchMode(mode) {
+      const btnStudy = document.getElementById('tabBtnStudy');
+      const btnQuiz = document.getElementById('tabBtnQuiz');
+      const viewStudy = document.getElementById('view-study');
+      const viewQuiz = document.getElementById('view-quiz');
+      const viewResult = document.getElementById('view-result');
+
+      viewResult.classList.add('hidden');
+
+      if (mode === 'study') {
+        btnStudy.className = "font-title text-lg px-5 py-2 rounded-xl transition flex items-center gap-1.5 bg-teal-500 text-white shadow";
+        btnQuiz.className = "font-title text-lg px-5 py-2 rounded-xl transition flex items-center gap-1.5 text-gray-600 hover:bg-amber-100";
+        viewStudy.classList.remove('hidden');
+        viewQuiz.classList.add('hidden');
+      } else {
+        btnQuiz.className = "font-title text-lg px-5 py-2 rounded-xl transition flex items-center gap-1.5 bg-rose-500 text-white shadow";
+        btnStudy.className = "font-title text-lg px-5 py-2 rounded-xl transition flex items-center gap-1.5 text-gray-600 hover:bg-amber-100";
+        viewStudy.classList.add('hidden');
+        viewQuiz.classList.remove('hidden');
+        startQuiz();
+      }
+    }
+
+    function renderStudyCards(items) {
+      document.getElementById('studyItemCount').textContent = `총 ${items.length}개의 핵심 어휘 카드`;
+      const container = document.getElementById('studyCardList');
+      if (items.length === 0) {
+        container.innerHTML = `<div class="col-span-2 text-center py-8 text-gray-500 font-bold">검색 결과가 없어요 😢</div>`;
+        return;
+      }
+      container.innerHTML = items.map(item => `
+        <div class="bg-amber-50/60 hover:bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 transition">
+          <div class="flex items-center space-x-2 mb-1.5">
+            <span class="font-title text-xs bg-amber-300 text-amber-950 px-2.5 py-0.5 rounded-full">항목 ${item.no}</span>
+            <h4 class="font-title text-xl text-gray-800">${item.title}</h4>
+          </div>
+          <p class="text-sm md:text-base text-gray-700 leading-relaxed pl-1">${item.desc}</p>
+        </div>
+      `).join('');
+    }
+
+    function filterStudyCards() {
+      const keyword = document.getElementById('studySearchInput').value.trim().toLowerCase();
+      if (!keyword) {
+        renderStudyCards(currentChapter.studyItems);
+        return;
+      }
+      const filtered = currentChapter.studyItems.filter(it =>
+        it.title.toLowerCase().includes(keyword) ||
+        it.desc.toLowerCase().includes(keyword) ||
+        it.no.includes(keyword)
+      );
+      renderStudyCards(filtered);
+    }
+
+    function renderPeekStudy(items) {
+      const peek = document.getElementById('peekStudyContent');
+      peek.innerHTML = items.map(item => `
+        <div class="bg-white p-2 rounded-xl border border-teal-200">
+          <span class="font-title text-teal-800">[${item.no}] ${item.title}</span>: 
+          <span class="text-gray-700">${item.desc.replace(/<br>/g, ' / ')}</span>
+        </div>
+      `).join('');
+    }
+
+    function toggleStudyPeek() {
+      const box = document.getElementById('peekStudyBox');
+      box.classList.toggle('hidden');
+    }
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function startQuiz() {
+      document.getElementById('view-result').classList.add('hidden');
+      document.getElementById('view-quiz').classList.remove('hidden');
+      document.getElementById('peekStudyBox').classList.add('hidden');
+
+      const shuffled = shuffleArray(currentChapter.quizPool);
+      currentQuizList = shuffled.slice(0, Math.min(10, shuffled.length));
+      currentQuizIndex = 0;
+      correctCount = 0;
+      userAnswersLog = [];
+
+      renderCurrentQuestion();
+    }
+
+    function renderCurrentQuestion() {
+      const qObj = currentQuizList[currentQuizIndex];
+      const total = currentQuizList.length;
+
+      const emojis = ["🐰", "🐻", "🦊", "🐼", "🐨", "🐯", "🦁", "🐸"];
+      document.getElementById('quizCharEmoji').textContent = emojis[currentQuizIndex % emojis.length];
+      document.getElementById('quizProgressText').textContent = `문제 ${currentQuizIndex + 1} / ${total}`;
+      document.getElementById('quizProgressBar').style.width = `${((currentQuizIndex + 1) / total) * 100}%`;
+
+      const currentScore = Math.round((correctCount / total) * 100);
+      document.getElementById('quizScoreBadge').textContent = `현재 ${currentScore}점`;
+
+      document.getElementById('quizItemNumberTag').textContent = `교재 ${qObj.tag}`;
+      document.getElementById('quizQuestionText').textContent = qObj.q;
+
+      document.getElementById('quizFeedbackBox').classList.add('hidden');
+
+      const optContainer = document.getElementById('quizOptionsContainer');
+      const optionColors = [
+        "bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-950",
+        "bg-sky-50 hover:bg-sky-100 border-sky-300 text-sky-950",
+        "bg-amber-50 hover:bg-amber-100 border-amber-300 text-amber-950"
+      ];
+
+      optContainer.innerHTML = qObj.options.map((optText, idx) => `
+        <button onclick="selectAnswer(${idx})" id="optBtn-${idx}"
+          class="btn-bounce ${optionColors[idx % optionColors.length]} border-4 rounded-3xl p-5 font-title text-2xl md:text-3xl text-center shadow-sm transition flex items-center justify-center gap-3">
+          <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-white text-lg border-2 border-current">${idx + 1}</span>
+          <span>${optText}</span>
+        </button>
+      `).join('');
+    }
+
+    function selectAnswer(selectedIndex) {
+      const qObj = currentQuizList[currentQuizIndex];
+      const isCorrect = (selectedIndex === qObj.answer);
+
+      qObj.options.forEach((_, idx) => {
+        const btn = document.getElementById(`optBtn-${idx}`);
+        btn.disabled = true;
+        btn.classList.remove('btn-bounce');
+        if (idx === qObj.answer) {
+          btn.className = "bg-emerald-100 border-4 border-emerald-500 text-emerald-950 rounded-3xl p-5 font-title text-2xl md:text-3xl text-center shadow-md flex items-center justify-center gap-3";
+        } else if (idx === selectedIndex && !isCorrect) {
+          btn.className = "bg-rose-100 border-4 border-rose-400 text-rose-900 rounded-3xl p-5 font-title text-2xl md:text-3xl text-center opacity-80 flex items-center justify-center gap-3 line-through";
+        } else {
+          btn.classList.add('opacity-50');
+        }
+      });
+
+      if (isCorrect) {
+        correctCount++;
+      }
+
+      userAnswersLog.push({
+        tag: qObj.tag,
+        question: qObj.q,
+        myAnswer: qObj.options[selectedIndex],
+        correctAnswer: qObj.options[qObj.answer],
+        isCorrect: isCorrect,
+        exp: qObj.exp
+      });
+
+      const fbBox = document.getElementById('quizFeedbackBox');
+      const fbEmoji = document.getElementById('feedbackEmoji');
+      const fbTitle = document.getElementById('feedbackTitle');
+      const fbDesc = document.getElementById('feedbackDesc');
+      const nextBtn = document.getElementById('nextQuestionBtn');
+
+      fbBox.classList.remove('hidden');
+      if (isCorrect) {
+        fbBox.className = "rounded-2xl p-5 mb-4 border-2 bg-emerald-50 border-emerald-300";
+        fbEmoji.textContent = "🎉";
+        fbTitle.textContent = "정답입니다! 정말 잘했어요!";
+        fbTitle.className = "font-title text-xl mb-1 text-emerald-800";
+      } else {
+        fbBox.className = "rounded-2xl p-5 mb-4 border-2 bg-rose-50 border-rose-300";
+        fbEmoji.textContent = "💡";
+        fbTitle.textContent = `아쉬워요! 정답은 [${qObj.options[qObj.answer]}] 입니다.`;
+        fbTitle.className = "font-title text-xl mb-1 text-rose-800";
+      }
+      fbDesc.textContent = qObj.exp;
+
+      if (currentQuizIndex + 1 < currentQuizList.length) {
+        nextBtn.textContent = "다음 문제로 ➡️";
+      } else {
+        nextBtn.textContent = "결과 확인 및 제출하기 🏆";
+      }
+    }
+
+    function nextQuestion() {
+      currentQuizIndex++;
+      if (currentQuizIndex < currentQuizList.length) {
+        renderCurrentQuestion();
+      } else {
+        finishQuiz();
+      }
+    }
+
+    function finishQuiz() {
+      document.getElementById('view-quiz').classList.add('hidden');
+      document.getElementById('view-result').classList.remove('hidden');
+
+      const totalCount = currentQuizList.length;
+      const finalScore = Math.round((correctCount / totalCount) * 100);
+
+      document.getElementById('resultChapterName').textContent = `제${currentChapter.id}장. ${currentChapter.title}`;
+      document.getElementById('resultScoreText').textContent = `${finalScore}점`;
+      document.getElementById('resultDetailCount').textContent = `${totalCount}문제 중 ${correctCount}문제 정답!`;
+
+      if (finalScore === 100) {
+        document.getElementById('resultEmoji').textContent = "👑";
+        document.getElementById('resultTitle').textContent = "와아! 완벽한 어휘 박사님이에요!";
+        document.getElementById('resultSubtitle').textContent = `${currentUser.name} 학생, 모든 문제를 정확하게 맞혔어요!`;
+        if (typeof confetti === 'function') {
+          confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        }
+      } else if (finalScore >= 70) {
+        document.getElementById('resultEmoji').textContent = "🥳";
+        document.getElementById('resultTitle').textContent = "참 잘했어요! 훌륭한 실력이에요!";
+        document.getElementById('resultSubtitle').textContent = `조금만 더 복습하면 100점도 문제없어요!`;
+      } else {
+        document.getElementById('resultEmoji').textContent = "🌱";
+        document.getElementById('resultTitle').textContent = "끝까지 도전한 멋진 모습 칭찬해요!";
+        document.getElementById('resultSubtitle').textContent = `개념 카드를 한 번 더 읽고 다시 도전해 볼까요?`;
+      }
+
+      const reviewContainer = document.getElementById('reviewNoteContainer');
+      const reviewList = document.getElementById('reviewList');
+      reviewContainer.classList.remove('hidden');
+      reviewList.innerHTML = userAnswersLog.map((log, i) => `
+        <div class="p-3.5 rounded-2xl border-2 ${log.isCorrect ? 'bg-emerald-50/60 border-emerald-200' : 'bg-rose-50/70 border-rose-200'}">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-title text-sm ${log.isCorrect ? 'text-emerald-800' : 'text-rose-800'}">
+              ${log.isCorrect ? '⭕ 정답' : '❌ 오답'} | 문제 ${i + 1} (${log.tag})
+            </span>
+            <span class="text-xs font-bold text-gray-600">내 답: ${log.myAnswer} / 정답: <b>${log.correctAnswer}</b></span>
+          </div>
+          <p class="text-sm font-bold text-gray-800 mb-1">${log.question}</p>
+          <p class="text-xs text-gray-600">💬 ${log.exp}</p>
+        </div>
+      `).join('');
+
+      submitToGoogleSheet(finalScore, correctCount, totalCount);
+    }
+
+    /**
+     * 깃허브 페이지(fetch)와 구글 웹앱(google.script.run) 양쪽 모두에서 작동하는 하이브리드 전송 함수
+     */
+    function submitToGoogleSheet(score, correct, total) {
+      const statusBox = document.getElementById('sheetSubmitStatus');
+      statusBox.className = "max-w-lg mx-auto rounded-2xl p-4 border-2 bg-blue-50 border-blue-200 text-blue-900 font-bold flex items-center justify-center space-x-3";
+      statusBox.innerHTML = `
+        <span class="animate-spin text-2xl">⏳</span>
+        <span>구글 시트 <b>'파일제출'</b> 탭에 결과를 저장하고 있어요...</span>
+      `;
+
+      const payload = {
+        studentId: currentUser.studentId,
+        name: currentUser.name,
+        chapterTitle: `제${currentChapter.id}장 ${currentChapter.title}`,
+        score: score,
+        correctCount: correct,
+        totalCount: total
+      };
+
+      // 1) 구글 웹앱 내부에서 실행 중일 때
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler((res) => {
+            if (res && res.success) {
+              showSuccessStatus(statusBox, res.timestamp, res.resultText);
+            } else {
+              showErrorStatus(statusBox, res ? res.message : '알 수 없는 오류');
+            }
+          })
+          .withFailureHandler((err) => {
+            showErrorStatus(statusBox, err.message);
+          })
+          .submitQuizResult(payload);
+        return;
+      }
+
+      // 2) 깃허브 페이지(GitHub Pages) 등 외부 웹사이트에서 실행 중일 때
+      if (GOOGLE_SCRIPT_WEB_APP_URL && GOOGLE_SCRIPT_WEB_APP_URL.startsWith("https://script.google.com/")) {
+        fetch(GOOGLE_SCRIPT_WEB_APP_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8" // CORS 사전 요청(Preflight) 방지용
+          },
+          body: JSON.stringify(payload)
+        })
+          .then(response => response.json())
+          .then(res => {
+            if (res && res.success) {
+              showSuccessStatus(statusBox, res.timestamp, res.resultText);
+            } else {
+              showErrorStatus(statusBox, res ? res.message : '저장 실패');
+            }
+          })
+          .catch(err => {
+            showErrorStatus(statusBox, "통신 오류가 발생했어요. 구글 웹앱 URL과 배포 권한(모든 사용자)을 확인해주세요.");
+          });
+      } else {
+        // 아직 URL을 넣지 않은 상태일 때 안내
+        setTimeout(() => {
+          statusBox.className = "max-w-lg mx-auto rounded-2xl p-4 border-2 bg-amber-50 border-amber-300 text-amber-900 font-bold flex flex-col items-center space-y-1";
+          statusBox.innerHTML = `
+            <div class="flex items-center space-x-2 text-base">
+              <span>💡</span>
+              <span><b>index.html</b>의 <code>GOOGLE_SCRIPT_WEB_APP_URL</code>에 구글 웹앱 주소를 넣으면 시트에 자동 저장됩니다!</span>
+            </div>
+            <p class="text-xs text-amber-800">저장 예정 데이터: ${payload.studentId} | ${payload.name} | [${payload.chapterTitle}] ${payload.score}점</p>
+          `;
+        }, 500);
+      }
+    }
+
+    function showSuccessStatus(statusBox, timestamp, resultText) {
+      statusBox.className = "max-w-lg mx-auto rounded-2xl p-4 border-2 bg-emerald-50 border-emerald-300 text-emerald-900 font-bold flex flex-col items-center space-y-1";
+      statusBox.innerHTML = `
+        <div class="flex items-center space-x-2 text-lg">
+          <span>✅</span>
+          <span>선생님의 구글 시트 <b>[파일제출]</b> 탭에 저장 완료!</span>
+        </div>
+        <p class="text-xs text-emerald-700">${currentUser.studentId} ${currentUser.name} | ${timestamp} | ${resultText}</p>
+      `;
+    }
+
+    function showErrorStatus(statusBox, msg) {
+      statusBox.className = "max-w-lg mx-auto rounded-2xl p-4 border-2 bg-rose-50 border-rose-300 text-rose-900 font-bold";
+      statusBox.innerHTML = `⚠️ 저장 중 오류가 발생했어요: ${msg}`;
+    }
+  </script>
+</body>
+</html>
